@@ -149,3 +149,12 @@ class Manager:
             if przelew.settlement_year > rok_koniec:
                 bledy.append(przelew)
         return bledy
+    
+    def set_transfer_limits(
+        self, min_k: float, max_k: float
+    ):
+        self.min_kwota = min_k
+        self.max_kwota = max_k
+
+    def validate_transfers(self) -> list:
+        return []
