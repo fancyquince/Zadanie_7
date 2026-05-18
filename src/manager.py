@@ -112,3 +112,16 @@ class Manager:
         if apartment_key not in self.apartments:
             raise ValueError("Apartment key does not exist")
         return any([bill for bill in self.bills if bill.apartment == apartment_key and bill.settlement_year == year and bill.settlement_month == month])
+    
+    def get_boundary_value_errors(self) -> list:
+        bledne_przelewy = []
+        
+        
+        min_kwota = getattr(self, 'min_transfer_amount', 0.0)
+        max_kwota = getattr(self, 'max_transfer_amount', float('inf'))
+        
+        for transfer in self.transfers:
+            if transfer.amount_pln < min_kwota or transfer.amount_pln > max_kwota:
+                bledne_przelewy.append(transfer)
+                
+        return bledne_przelewy
