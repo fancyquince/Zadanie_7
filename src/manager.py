@@ -112,3 +112,24 @@ class Manager:
         if apartment_key not in self.apartments:
             raise ValueError("Apartment key does not exist")
         return any([bill for bill in self.bills if bill.apartment == apartment_key and bill.settlement_year == year and bill.settlement_month == month])
+    
+    def test_detect_transfer_without_existing_tenant():
+        manager = Manager(Parameters())
+    
+        manager.tenants = {
+            "Kowalski": Tenant(name="Kowalski", apartment="A1", deposit_pln=1000.0)
+        }
+    
+    
+        manager.transfers = [
+            Transfer(tenant="Nowak", amount_pln=1500.0, type="rent", settlement_year=2026, settlement_month=5)
+        ]
+
+        errors = manager.get_transfer_errors()
+
+        assert errors is not None, "Metoda powinna zwrócić listę błędów"
+        assert len(errors) == 1, "Powinien zostać wykryty dokładnie jeden błąd dla błędnego przelewu"
+        assert "Nowak" in errors[0], "Komunikat błędu powinien zawierać nazwę nieistniejącego najemcy"
+
+    def test_detect_transfer_outside_lease_period():
+        pass
