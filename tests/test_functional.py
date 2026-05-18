@@ -126,3 +126,26 @@ def test_weryfikacja_bledow_w_przelewach():
     assert p1 not in wynik
     assert p2 in wynik
     assert p3 in wynik
+
+def test_walidacja_limitow_przelewow():
+    from src.models import Transfer
+    from src.manager import Manager
+    from src.models import Parameters
+
+    zarzadca = Manager(Parameters())
+    zarzadca.set_transfer_limits(
+        10.0, 1000.0
+    )
+    p1 = Transfer(
+        amount_pln=5.0,
+        date="2025-01-01",
+        settlement_year=2025,
+        settlement_month=1,
+        tenant="t1",
+    )
+    zarzadca.transfers = [p1]
+    wynik = (
+        zarzadca
+        .validate_transfers()
+    )
+    assert p1 in wynik
