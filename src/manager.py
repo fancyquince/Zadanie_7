@@ -113,15 +113,48 @@ class Manager:
             raise ValueError("Apartment key does not exist")
         return any([bill for bill in self.bills if bill.apartment == apartment_key and bill.settlement_year == year and bill.settlement_month == month])
     
-    def get_boundary_value_errors(self) -> list:
-        bledne_przelewy = []
-        
-        
-        min_kwota = getattr(self, 'min_transfer_amount', 0.0)
-        max_kwota = getattr(self, 'max_transfer_amount', float('inf'))
-        
-        for transfer in self.transfers:
-            if transfer.amount_pln < min_kwota or transfer.amount_pln > max_kwota:
-                bledne_przelewy.append(transfer)
-                
-        return bledne_przelewy
+    def test_detect_transfer_without_existing_tenant():
+        manager = Manager(Parameters())
+    
+        manager.tenants = {
+            "Kowalski": Tenant(name="Kowalski", apartment="A1", deposit_pln=1000.0)
+        }
+    
+    
+        manager.transfers = [
+            Transfer(tenant="Nowak", amount_pln=1500.0, type="rent", settlement_year=2026, settlement_month=5)
+        ]
+
+        errors = manager.get_transfer_errors()
+
+        assert errors is not None, "Metoda powinna zwrócić listę błędów"
+        assert len(errors) == 1, "Powinien zostać wykryty dokładnie jeden błąd dla błędnego przelewu"
+        assert "Nowak" in errors[0], "Komunikat błędu powinien zawierać nazwę nieistniejącego najemcy"
+
+    def test_detect_transfer_outside_lease_period():
+        pass
+    
+    def znajdz_bledne_przelewy(self) -> list:
+        bledy = []
+        for przelew in self.transfers:
+            if przelew.tenant not in self.tenants:
+                bledy.append(przelew)
+                continue
+            lokator = self.tenants[przelew.tenant]
+            rok_start = int(lokator.date_agreement_from[:4])
+            rok_koniec = int(lokator.date_agreement_to[:4])
+            if przelew.settlement_year < rok_start:
+                bledy.append(przelew)
+                continue
+            if przelew.settlement_year > rok_koniec:
+                bledy.append(przelew)
+        return bledy
+    
+    def set_transfer_limits(
+        self, min_k: float, max_k: float
+    ):
+        self.min_kwota = min_k
+        self.max_kwota = max_k
+
+    def validate_transfers(self) -> list:
+        return []
