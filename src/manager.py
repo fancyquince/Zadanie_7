@@ -133,19 +133,3 @@ class Manager:
 
     def test_detect_transfer_outside_lease_period():
         pass
-
-    def znajdz_bledne_przelewy(self) -> list:
-        bledy = []
-        for przelew in self.transfers:
-            if przelew.tenant not in self.tenants:
-                bledy.append(przelew)
-                continue
-            lokator = self.tenants[przelew.tenant]
-            rok_start = int(lokator.date_agreement_from[:4])
-            rok_koniec = int(lokator.date_agreement_to[:4])
-            if przelew.settlement_year < rok_start:
-                bledy.append(przelew)
-                continue
-            if przelew.settlement_year > rok_koniec:
-                bledy.append(przelew)
-        return bledy
