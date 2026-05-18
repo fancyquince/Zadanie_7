@@ -9,6 +9,21 @@ class Parameters(BaseModel):
     tenants_json_path: str = 'data/tenants.json'
     transfers_json_path: str = 'data/transfers.json'
     bills_json_path: str = 'data/bills.json'
+    blacklist_json_path: str = 'data/blacklist.json'
+
+class BlacklistEntry(BaseModel):
+    name: str
+    reason: str | None = None
+
+    @staticmethod
+    def from_json_file(file_path: str) -> list['BlacklistEntry']:
+        import json
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return [BlacklistEntry(**entry) for entry in data]
+        except FileNotFoundError:
+            return []
 
 
 class Room(BaseModel):
